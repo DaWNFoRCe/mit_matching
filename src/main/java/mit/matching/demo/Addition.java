@@ -34,32 +34,22 @@ private static final long serialVersionUID = 6415583508947017554L;
 	@Override
 	public ProtocolProducer prepareApplication(ProtocolFactory factory) {
 		BasicNumericFactory bnFac = (BasicNumericFactory)factory;
-		NumericProtocolBuilder npb = new NumericProtocolBuilder(bnFac);
-		ComparisonProtocolBuilder cpb = new ComparisonProtocolBuilder((ComparisonProtocolFactory)factory, bnFac);
 		NumericIOBuilder iob = new NumericIOBuilder(bnFac);
 		// Input points
 		iob.beginParScope();
 			x1 = (myId == 1) ? iob.input(myX, 1) : iob.input(1);  
-			x2 = (myId == 2) ? iob.input(myX, 2) : iob.input(2); 
-			 
+			x2 = (myId == 2) ? iob.input(myX, 2) : iob.input(2); 			 
 		iob.endCurScope();
-		// Compute distance squared (note, square root computation can be done publicly)
-		npb.beginParScope();
-			npb.beginSeqScope();
-				SInt addX = npb.sub(x1, x2);
-				//SInt multX = npb.mult(dX, dX);
-			npb.endCurScope();
-			
-		npb.endCurScope();
-		//cpb.beginParScope();
-		//	cpb.beginParScope();
-		//		SInt compX= cpb.compare(x1, x2);
-		//	cpb.endCurScope();
-		//cpb.endCurScope();
-		SInt result = addX; 
-		iob.addProtocolProducer(npb.getProtocol());
+		/********Addition Call*******/
+		Response result = this.add2Numbers(x1, x2, bnFac);
+		/********Multiplication Call*******/
+		//Response result = this.add2Numbers(x1, x2, bnFac);
+		/********Multiplication Call*******/
+		//Response result = this.comp2Numbers(x1, x2, factory);
+		
+		iob.addProtocolProducer(result.getBuilder().getProtocol());
 		// Output result
-		addition = iob.output(result);
+		addition = iob.output(result.getValue());
 		return iob.getProtocol();
 	}
 	
@@ -108,6 +98,41 @@ private static final long serialVersionUID = 6415583508947017554L;
 		
 		System.out.println("Addition between party 1 and 2 is " + total);
 	}
+	
+	Response add2Numbers(SInt x1, SInt x2,  BasicNumericFactory bnFac ){
+		NumericProtocolBuilder npb = new NumericProtocolBuilder(bnFac);
+		npb.beginParScope();
+			npb.beginSeqScope();
+				SInt addX = npb.add(x1, x2);			
+			npb.endCurScope();		
+		npb.endCurScope();
+
+		return new Response(addX,npb);
+	};
+	
+	Response mult2Numbers(SInt x1, SInt x2,  BasicNumericFactory bnFac){
+		
+		NumericProtocolBuilder npb = new NumericProtocolBuilder(bnFac);
+		npb.beginParScope();
+			npb.beginSeqScope();
+				SInt multX = npb.mult(x1, x2);			
+			npb.endCurScope();		
+		npb.endCurScope();
+
+		return new Response(multX, npb);
+	};
+	
+	Response comp2Numbers(SInt x1, SInt x2, ProtocolFactory factory){
+		
+		ComparisonProtocolBuilder cpb = new ComparisonProtocolBuilder((ComparisonProtocolFactory)factory, (BasicNumericFactory)factory);
+		cpb.beginParScope();
+			cpb.beginParScope();
+				SInt compX= cpb.compare(x1, x2);
+			cpb.endCurScope();
+		cpb.endCurScope();
+		
+		return new Response (compX, cpb);
+	};
 	
 	
 
