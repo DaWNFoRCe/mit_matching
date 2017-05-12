@@ -28,8 +28,7 @@ private static final long serialVersionUID = 6415583508947017554L;
 	
 	public Addition(int id, int x) {
 		this.myId = id;
-		this.myX = x;
-		
+		this.myX = x;		
 	}
 
 	@Override
@@ -96,19 +95,21 @@ private static final long serialVersionUID = 6415583508947017554L;
 			cmdUtil.displayHelp();
 			System.exit(-1);	
 		} 
-		Addition distDemo = new Addition(sceConf.getMyId(), x);
+		Addition addition = new Addition(sceConf.getMyId(), x);
 		SCE sce = SCEFactory.getSCEFromConfiguration(sceConf);
 		try {
-			sce.runApplication(distDemo);
+			sce.runApplication(addition);
 		} catch (Exception e) {
 			System.out.println("Error while doing MPC: " + e.getMessage());
 			e.printStackTrace();
 			System.exit(-1);
 		}
-		double total = distDemo.addition.getValue().doubleValue();
+		double total = addition.addition.getValue().doubleValue();
 		
 		System.out.println("Addition between party 1 and 2 is " + total);
 	}
+	
+	
 
 
 }
